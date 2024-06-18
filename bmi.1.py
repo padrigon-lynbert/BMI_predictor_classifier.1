@@ -46,22 +46,27 @@ conf = confusion_matrix(y_test, y_pred)
 report = classification_report(y_test, y_pred, zero_division=0)
 
 
-class_names = ['BMI 0', 'BMI 1', 'BMI 2', 'BMI 3', 'BMI 4', 'BMI 5']
+coefficients = model.coef_[0]
 
-#mask for the diagonal elements
-mask = np.zeros_like(conf, dtype=bool)
-np.fill_diagonal(mask, True)
+feature_names = X.columns
+coef_df = pd.DataFrame({'Feature': feature_names, 'Coefficient': coefficients})
 
-#colormap for the heatmap
-cmap = sns.diverging_palette(220, 300, as_cmap=True)
+coef_df['Abs_Coefficient'] = coef_df['Coefficient'].abs()
+coef_df = coef_df.sort_values(by='Abs_Coefficient', ascending=False)
 
-plt.figure(figsize=(5,5))
-sns.heatmap(conf, annot=True, fmt='d', cmap=cmap, xticklabels=class_names, yticklabels=class_names, mask=~mask, cbar=False, linewidths=.5)
-sns.heatmap(conf, annot=True, fmt='d', cmap='Greens', xticklabels=class_names, yticklabels=class_names, mask=mask, cbar=False, linewidths=.5)
+plt.figure(figsize=(7, 5))  # Adjust the width and height
+sns.barplot(x='Coefficient', y='Feature', data=coef_df, palette='viridis', width=0.6)  # Adjust the width of the bars
+plt.xlabel('Coefficient Magnitude')
+plt.ylabel('Feature')
+plt.title('Logistic Regression Coefficients')
+plt.grid(True)
+plt.show()
 
-plt.xlabel('Predicted Labels')
-plt.ylabel('True Labels')
-plt.title('Confusion Matrix')
-save_name = 'confusion_matrix.png'
+
+
+
+
+
+# save_name = 'confusion_matrix.png'
 # plt.savefig(os.path.join(save_path, save_name))
 plt.show()
